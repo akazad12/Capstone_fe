@@ -26,7 +26,7 @@ function Login() {
       console.log(res.data)
       if (res.data.token) {
         localStorage.setItem("token", res.data.token);
-        navigate("/home");
+        navigate("/portfolio");
         console.log("logged in", res.data);
       } else{
         setError("Invalid email or password")
