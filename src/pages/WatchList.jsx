@@ -84,7 +84,8 @@ function WatchList() {
         `http://localhost:3000/api/users/${userId}/watchlist`,
       );
       // Get the symbol from the serve
-      let stockFromDB = watchlistRes.data.stocks.find(
+      let stocks = watchlistRes.data?.stocks || [];
+      let stockFromDB = stocks.find(
         (stock) => stock.symbol === search,
       );
 
