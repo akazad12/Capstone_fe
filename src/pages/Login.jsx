@@ -26,6 +26,8 @@ function Login() {
       console.log(res.data)
       if (res.data.token) {
         localStorage.setItem("token", res.data.token);
+        //Used later to attach watchlist to porfolio
+        localStorage.setItem("userId", res.data.user._id);
         navigate("/portfolio");
         console.log("logged in", res.data);
       } else{
