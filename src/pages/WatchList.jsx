@@ -180,6 +180,7 @@ function WatchList() {
             ))}
           </ul>
         )}
+        <button onClick={() => navigate("/portfolio")}>Go to Portfolio</button>
       </div>
     </div>
   );
