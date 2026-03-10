@@ -28,6 +28,8 @@ function Login() {
         localStorage.setItem("token", res.data.token);
         //Used later to attach watchlist to porfolio
         localStorage.setItem("userId", res.data.user._id);
+        //Used in porfolio page to get users name
+        localStorage.setItem("userName", res.data.user.name);
         navigate("/portfolio");
         console.log("logged in", res.data);
       } else{
