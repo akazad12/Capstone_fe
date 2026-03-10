@@ -1,0 +1,45 @@
+.watchlist-container {
+  display: flex;
+  gap: 40px;
+  padding: 20px;
+}
+
+/* LEFT SIDE (Search) */
+.search-section {
+  width: 40%;
+}
+
+.search-section input {
+  padding: 8px;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.search-section button {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* RIGHT SIDE (Watchlist) */
+.watchlist-section {
+  width: 60%;
+}
+
+.watchlist-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.watchlist-section li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.watchlist-section button {
+  margin-left: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}

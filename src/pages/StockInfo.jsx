@@ -1,46 +1,48 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate} from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 function StockInfo() {
-  const { symbol } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams(); 
+  const navigate = useNavigate(); 
   const [stock, setStock] = useState(null);
+  const [currentPrice,setCurrentPrice] = useState(null)
+  const FKEY = import.meta.env.VITE_FKEY;
 
   useEffect(() => {
-    const fetchStock = async () => {
+      const fetchStock = async () => {
       try {
-        const res = await axios.post(
-          "http://localhost:3000/api/assets",
-          { symbol }
+        // Get stock metadata from DB
+        const res = await axios.get(`http://localhost:3000/api/assets/${id}`);
+        const stockData = res.data;
+        setStock(stockData);
+
+        // Get live price from Finnhub
+        const quoteRes = await axios.get(
+          `https://finnhub.io/api/v1/quote?symbol=${stockData.symbol}&token=${FKEY}`
         );
-
-        setStock(res.data);
-
+        setCurrentPrice(quoteRes.data.c);
       } catch (err) {
         console.log(err);
       }
     };
 
     fetchStock();
-  }, [symbol]);
+  }, [id]);
 
-  if (!stock) return <p>Loading...</p>;
+  if (!stock) return <p>Stock not found</p>;
+
 
   return (
     <div>
-      <h1>{stock.name}</h1>
-
-      <p>Symbol: {stock.symbol}</p>
-      <p>Price: ${stock.currentPrice}</p>
+      <h1>{stock.name} ({stock.symbol})</h1>
+      <p>Price: ${currentPrice}</p>
       <p>Exchange: {stock.exchange}</p>
       <p>Sector: {stock.sector}</p>
       <p>Market Cap: {stock.marketCap}</p>
-
-      <button onClick={() => navigate("/watchlist")}>
-        Back
-      </button>
+       <button onClick={() => navigate("/watchlist")}>Back to Watchlist</button>
     </div>
+    
   );
 }
 

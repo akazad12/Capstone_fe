@@ -15,7 +15,7 @@ function App() {
       <Route path = '/login' element= {<Login/>}/>
       <Route path= '/portfolio' element={<Portfolio />} />
       <Route path = '/watchlist' element= {<Watchlist/>}/>
-      <Route path = 'stock/:symbol' element= {<StockInfo/>}/>
+      <Route path = 'stock/:id' element= {<StockInfo/>}/>
     </Routes>
     </BrowserRouter>
   )
