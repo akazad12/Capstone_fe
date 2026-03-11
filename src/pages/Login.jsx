@@ -83,7 +83,7 @@ function Login() {
             : "Don't have an account?"}
 
           <span
-            onClick={() => setMode(mode === "signup" ? "login" : "signup")}
+            onClick={() => navigate(mode === "signup" ? "/login" : "/signup")}
             
             style={{ cursor: "pointer", color: "blue", marginLeft: "5px" }}
           >
