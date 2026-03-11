@@ -3,6 +3,8 @@
 ## [Backend Repository](https://github.com/akazad12/Capstone_be)
 *Click here to view the backend API for this project.*
 
+[Create Finnhub Api Key ](https://finnhub.io/)
+
 This is the **frontend** for the Capstone Stock Portfolio Tracker application.
 It allows users to view and manage their stock watchlist, portfolio, and view live stock information.
 
