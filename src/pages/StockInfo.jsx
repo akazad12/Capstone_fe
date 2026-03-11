@@ -3,9 +3,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function StockInfo() {
+    // gets stock id from the url
   const { id } = useParams(); 
   const navigate = useNavigate(); 
+
+    // state is used to store stock data
   const [stock, setStock] = useState(null);
+    // state is used to store the realtime price of the stock
   const [currentPrice,setCurrentPrice] = useState(null)
   const FKEY = import.meta.env.VITE_FKEY;
 
@@ -30,10 +34,12 @@ function StockInfo() {
     fetchStock();
   }, [id]);
 
+  //message shown if stock is not found
   if (!stock) return <p>Stock not found</p>;
 
 
   return (
+    //all data being displayed on the frontend
     <div>
       <h1>{stock.name} ({stock.symbol})</h1>
       <p>Price: ${currentPrice}</p>

@@ -1,0 +1,21 @@
+.navbar {
+position: sticky;
+top: 0;
+left: 0;
+right: 0;
+display: flex;
+gap: 24px;
+padding: 14px 32px;
+justify-content: space-evenly;
+}
+
+.navbar-link {
+color: darkgray;
+text-decoration: none;
+}
+
+.navbar-link.active {
+color: white;
+font-weight: bold;
+}
+

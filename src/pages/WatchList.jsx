@@ -6,28 +6,34 @@ import axios from "axios";
 
 function WatchList() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
-  const [watchlist, setWatchlist] = useState([]);
-  const FKEY = import.meta.env.VITE_FKEY;
-  //userId stored in local storage in login
-  const userId = localStorage.getItem("userId");
+  const [search, setSearch] = useState(""); //stores search inputs
+  const [results, setResults] = useState([]); //stores search results
+  const [watchlist, setWatchlist] = useState([]); //users watchlist
+  const [assets, setAssets] = useState([]); //All stocks in the database
+  const [error, setError] = useState(""); //Error messages
 
-  const isMarketOpen = ()=>{
+  const FKEY = import.meta.env.VITE_FKEY; //Finnhub API key
+
+  const userId = localStorage.getItem("userId"); //userId stored in local storage in login
+
+  //checks if the market is currently open
+  const isMarketOpen = () => {
     const now = new Date();
-    const day = now.getDay()
+    const day = now.getDay();
     //0=sunday,6=saturday
     if (day === 0 || day === 6) return false;
 
-    const hours = now.getHours()
-    const minutes = now.getMinutes()
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
 
-    const currentTime = hours*60+minutes;
-    const openTime = 9*60+30; //market opens at 9:30am
-    const closeTIme = 26*60;    //market closes at 4pm
+    const currentTime = hours * 60 + minutes;
+    const openTime = 9 * 60 + 30; //market opens at 9:30am
+    const closeTIme = 26 * 60; //market closes at 4pm
 
-    return currentTime >= openTime && currentTime <=closeTIme;
-  }
+    return currentTime >= openTime && currentTime <= closeTIme;
+  };
+
+  //updates stock prices in the watchlist
   const updatePrices = async () => {
     if (watchlist.length === 0) return;
 
@@ -47,7 +53,7 @@ function WatchList() {
       console.log("Error updating prices:", err);
     }
   };
-
+  //Fetches current users watchlist from db
   const userWatchlist = async () => {
     try {
       const res = await axios.get(
@@ -59,16 +65,34 @@ function WatchList() {
     }
   };
 
+  //Fetches all assets from the db to display in dropdown
+  const getAssets = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/api/assets");
+      setAssets(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  //Fetches all assets
+  useEffect(() => {
+    getAssets();
+  }, []);
+
+  //Fetches users watchlist when userId exists
   useEffect(() => {
     if (userId) {
       userWatchlist();
     }
   }, [userId]);
+
+  //updates watchlist prices every 30 seconds if market is open
   useEffect(() => {
     if (watchlist.length === 0) return;
-    
+
     if (!isMarketOpen) return;
-    
+
     const interval = setInterval(() => {
       updatePrices();
     }, 30000);
@@ -76,41 +100,44 @@ function WatchList() {
     return () => clearInterval(interval);
   }, [watchlist]);
 
+  //searches
   const searchStock = async (e) => {
     e.preventDefault();
     try {
-      // Get the current watchlist from datbase
+      // Get the users watchlist from datbase
       const watchlistRes = await axios.get(
         `http://localhost:3000/api/users/${userId}/watchlist`,
       );
-      // Get the symbol from the serve
+
       let stocks = watchlistRes.data?.stocks || [];
-      let stockFromDB = stocks.find(
-        (stock) => stock.symbol === search,
-      );
+      let stockFromDB = stocks.find((stock) => stock.symbol === search);
 
-      // If stock not found, add it to the database
+      //if stock is not in the db add stock to the db
       if (!stockFromDB) {
-        const addRes = await axios.post(`http://localhost:3000/api/assets`, {
-          symbol: search,
-        });
+        try {
+          const addRes = await axios.post("http://localhost:3000/api/assets", {
+            symbol: search,
+          });
 
-        // Stock data from database
-        stockFromDB = addRes.data;
+          stockFromDB = addRes.data;
+        } catch (err) {
+          setResults([]);
+          setError("Stock not found");
+          return;
+        }
       }
-
       // Get the live price from Finnhub
       const quote = await axios.get(
         `https://finnhub.io/api/v1/quote?symbol=${stockFromDB.symbol}&token=${FKEY}`,
       );
-
+      setError("");
       // Combine the data and set results
       setResults([{ ...stockFromDB, currentPrice: quote.data.c }]);
     } catch (err) {
       console.log("Error fetching or adding stock:", err);
     }
   };
-
+  //add stock to users watchlist
   const addToWatchlist = async (assetId) => {
     try {
       await axios.post(
@@ -122,6 +149,7 @@ function WatchList() {
       console.log(err);
     }
   };
+  //remove single stock from users watchlist
   const removeFromWatchlist = async (assetId) => {
     try {
       await axios.delete(
@@ -135,20 +163,37 @@ function WatchList() {
 
   return (
     <div className="watchlist-container">
+      {/* Search section */}
       <div className="search-section">
         <h2>Search Stock</h2>
 
-        <form onSubmit={searchStock}>
+        <form onSubmit={searchStock} className="search-column">
           <input
             type="text"
             placeholder="Ticker (AAPL)"
             value={search}
-            onChange={(e) => setSearch(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              setSearch(e.target.value.toUpperCase());
+              setError("");
+            }}
           />
+
+          {/* Dropdown to select existing stock in db */}
+          <select onChange={(e) => setSearch(e.target.value)} defaultValue="">
+            <option value="">Select Stock</option>
+
+            {assets.map((asset) => (
+              <option key={asset._id} value={asset.symbol}>
+                {asset.symbol} - {asset.name}
+              </option>
+            ))}
+          </select>
 
           <button type="submit">Search</button>
         </form>
+        {error && <p className="error-message">{error}</p>}
 
+            {/* Display search result */}
         {results.length > 0 && (
           <div>
             <h3>{results[0].name}</h3>
@@ -164,6 +209,7 @@ function WatchList() {
         )}
       </div>
 
+        {/* Watchlist section */}
       <div className="watchlist-section">
         <h2>Your Watchlist</h2>
 
@@ -181,7 +227,6 @@ function WatchList() {
             ))}
           </ul>
         )}
-        <button onClick={() => navigate("/portfolio")}>Go to Portfolio</button>
       </div>
     </div>
   );
